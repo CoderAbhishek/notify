@@ -5,7 +5,7 @@ import com.avinod.settingsmodule.entity.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NotificationRepository extends JpaRepository<Notifications, Integer> {
+import java.util.List;
 
-    Notifications findByUser(User user);
+public interface NotificationRepository extends JpaRepository<Notifications, Integer> {
 }

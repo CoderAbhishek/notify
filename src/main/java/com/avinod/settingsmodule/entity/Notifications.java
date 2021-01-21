@@ -9,13 +9,9 @@ import java.util.Date;
 public class Notifications {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notificationId")
     private int notificationId;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "userId")
-    private User user;
 
     @Column(name = "description")
     private String message;
@@ -29,11 +25,11 @@ public class Notifications {
     public Notifications() {
     }
 
-    public Notifications(User user, String message, Date createdAt) {
-        this.user = user;
+    public Notifications(int notificationId, String message, boolean isRead, Date createdAt) {
+        this.notificationId = notificationId;
         this.message = message;
+        this.isRead = isRead;
         this.createdAt = createdAt;
-        this.isRead = false;
     }
 
     public int getNotificationId() {
@@ -42,14 +38,6 @@ public class Notifications {
 
     public void setNotificationId(int notificationId) {
         this.notificationId = notificationId;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getMessage() {

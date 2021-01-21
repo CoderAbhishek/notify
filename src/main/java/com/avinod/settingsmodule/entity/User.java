@@ -8,7 +8,7 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userId")
     private int userId;
 
@@ -21,15 +21,15 @@ public class User {
     @Column(name = "email")
     private String email;
 
-//    @OneToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "userId")
-    @OneToMany(mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER,orphanRemoval = true)
+    @JoinColumn(name = "userId")
     private List<Notifications> notifications;
 
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, List<Notifications> notifications) {
+    public User(int userId,String firstName, String lastName, String email, List<Notifications> notifications) {
+        this.userId=userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

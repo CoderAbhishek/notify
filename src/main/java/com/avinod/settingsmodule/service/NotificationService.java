@@ -6,10 +6,14 @@ import com.avinod.settingsmodule.exception.ResourceNotFoundException;
 import com.avinod.settingsmodule.repository.NotificationRepository;
 import com.avinod.settingsmodule.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -21,18 +25,20 @@ public class NotificationService {
     @Autowired
     private UserRepository userRepository;
 
-    public NotificationService() {
+    public void addTestDatas(){
+        Notifications notifications1=new Notifications(1,"Message1",false,new java.util.Date());
+        Notifications notifications2=new Notifications(2,"Message2",true,new java.util.Date());
+        List<Notifications> notify=new ArrayList<>();
+        notify.add(notifications1);
+        notify.add(notifications2);
+        User user=new User(1,"Abhi","Vinod","abhi@gmail.com",notify);
+        userRepository.save(user);
     }
 
-//    public List<Notifications> getAllNotifications(){
-//        return this.notificationRepository.findAll();
-//    }
+    public List<Notifications> getAllNotifications(){
+        return this.notificationRepository.findAll();
+    }
 
-//    public Notifications getNotificationsByUserId(int userId){
-//        return this.notificationRepository
-//                .findById(userId)
-//                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: "+userId));
-//    }
     public List<Notifications> getNotificationsByUserId(int userId){
         User user = this.userRepository
                 .findById(userId)
@@ -40,39 +46,38 @@ public class NotificationService {
         return user.getNotifications();
     }
 
-//    public Notifications createNotification(Notifications notification){
-//        return this.notificationRepository.save(notification);
-//    }
-    public User createNotification(int userId, Notifications notification){
-        User user = this.userRepository
+    public String createNotification(int userId,Notifications notification){
+        User user=userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: "+userId));
-        user.getNotifications().add(userId,notification);
-        return this.userRepository.save(user);
-//        return this.notificationRepository.save(notification);
+        user.getNotifications().add(notification);
+        this.userRepository.save(user);
+        return "Notification added to user successfully";
     }
 
-    public Notifications updateNotification(Notifications notification, int notificationId){
-        Notifications currentNotification = this.notificationRepository
-                .findById(notificationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
-        currentNotification.setRead(notification.isRead());
-        return this.notificationRepository.save(currentNotification);
+    public ResponseEntity<?> updateNotification(int userId,Notifications notifications){
+        User user=userRepository
+                .findById(userId).
+                        orElseThrow(() -> new ResourceNotFoundException("User not found with id: "+userId));
+        List<Notifications> updateNotification=user.getNotifications();
+        Iterator<Notifications> iterator=updateNotification.iterator();
+        while(iterator.hasNext()){
+            Notifications notify=iterator.next();
+            if(notify.getNotificationId()==notifications.getNotificationId()){
+                notify.setRead(true);
+            }
+        }
+        user.setNotifications(updateNotification);
+        this.userRepository.save(user);
+        return new ResponseEntity("Notification updated Successfully",HttpStatus.OK);
     }
 
-//    public ResponseEntity<Notifications> deleteNotification(int notificationId){
-//        Notifications currentNotification = this.notificationRepository
-//                .findById(notificationId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
-//        this.notificationRepository.delete(currentNotification);
-//        return ResponseEntity.ok().build();
-//    }
-    public ResponseEntity<Notifications> deleteNotification(int userId){
+    public ResponseEntity<?> deleteNotification(int userId){
         User user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: "+userId));
         user.getNotifications().clear();
         this.userRepository.save(user);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>("Notifications of userId "+userId+" are successfully deleted", HttpStatus.OK);
     }
 
 }
